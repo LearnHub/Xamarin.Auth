@@ -220,6 +220,7 @@ src/samples/Components/**
 
 /docs/ubertesters.sdk.ios %
 
+**/.vs/
 
 #------------------------------------------
 # iOS build files
