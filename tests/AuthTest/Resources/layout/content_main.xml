@@ -7,18 +7,24 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/activity_main">
 
-    <TextView
+    <!--<TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:text="Hello World!" 
-        android:id="@+id/txtMessage"/>
+        android:id="@+id/txtMessage"/>-->
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btnAuth"
-        android:text="Test Auth"
+        android:id="@+id/btnShib"
+        android:text="Test iLearn"
+        android:layout_centerInParent="true"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnMicrosoft"
+        android:text="Test Microsoft"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/txtMessage"/>
+        android:layout_below="@id/btnShib"/>
 
 </RelativeLayout>

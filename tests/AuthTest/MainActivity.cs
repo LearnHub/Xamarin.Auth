@@ -32,15 +32,58 @@ namespace AuthTest
 
             Log.Info(TAG, $"OnCreate() called...");
 
-            Button btnAuth = FindViewById<Button>(Resource.Id.btnAuth);
-            btnAuth.Click += BtnAuth_Click;
+            Button btnShib = FindViewById<Button>(Resource.Id.btnShib);
+            btnShib.Click += BtnShib_Click;
+
+            Button btnMicrosoft = FindViewById<Button>(Resource.Id.btnMicrosoft);
+            btnMicrosoft.Click += BtnMicrosoft_Click;
         }
 
-        public static readonly string URL_AUTH = "https://shib.learnpad.com/Shibboleth.sso/Login";
-        public static readonly string URL_REDIRECT = "https://api.learnpad.com/login/success/";
+        public static readonly string URL_SHIB_AUTH = "https://shib.learnpad.com/Shibboleth.sso/Login";
+        public static readonly string URL_SHIB_REDIRECT = "https://api.learnpad.com/login/success/";
 
-        private async void BtnAuth_Click(object sender, EventArgs e) {
-            var authenticator = new WebRedirectAuthenticator(new Uri(URL_AUTH), new Uri(URL_REDIRECT));
+        public static readonly string OAUTH_MS_URL = "https://login.microsoftonline.com/common/oauth2/V2.0/authorize";
+        public static readonly string OAUTH_MS_REDIRECT_URL = "https://connect.learnpad.com/login/";
+        public static readonly string OAUTH_MS_CLIENT_ID = "1a7bcec1-5c20-42e2-8f7b-bf086abfe911";
+        public static readonly string OAUTH_MS_SCOPE = "openid email https://graph.microsoft.com/user.read";
+
+        private async void BtnShib_Click(object sender, EventArgs e) {
+            var authenticator = new WebRedirectAuthenticator(new Uri(URL_SHIB_AUTH), new Uri(URL_SHIB_REDIRECT));
+            authenticator.BrowsingCompleted += authenticator_BrowsingCompleted;
+            authenticator.Completed += authenticator_Completed;
+            authenticator.Error += authenticator_Error;
+
+            Account account = null;
+
+            // If authorization succeeds or is canceled, Completed event will be fired
+
+            var tcs = new TaskCompletionSource<Account>();
+            EventHandler<AuthenticatorCompletedEventArgs> onCompleteHandler = (o, ea) => tcs.SetResult(ea.IsAuthenticated ? ea.Account : null);
+
+            authenticator.Completed += onCompleteHandler;
+            try {
+                // Raise UI dialog
+                var oUI = authenticator.GetUI(Application.Context);
+                var intent = oUI as Intent;
+                intent.SetFlags(ActivityFlags.NewTask);
+                Application.Context.StartActivity(intent);
+                // Wait for dialog completion event handler to fire
+                account = await tcs.Task.ConfigureAwait(false);
+            } catch (Exception ex) {
+                Log.Error(TAG, $"Auth exception ->{ex.Message}");
+            } finally {
+                authenticator.Completed -= onCompleteHandler;
+            }
+        }
+
+        private async void BtnMicrosoft_Click(object sender, EventArgs e) {
+            var authenticator = new OAuth2Authenticator(
+                OAUTH_MS_CLIENT_ID,
+                OAUTH_MS_SCOPE,
+                new Uri(OAUTH_MS_URL),
+                new Uri(OAUTH_MS_REDIRECT_URL)) {
+                AllowCancel = true,
+            };
             authenticator.BrowsingCompleted += authenticator_BrowsingCompleted;
             authenticator.Completed += authenticator_Completed;
             authenticator.Error += authenticator_Error;
