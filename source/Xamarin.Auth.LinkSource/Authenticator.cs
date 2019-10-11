@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
 using Xamarin.Utilities;
+using Android.Util;
 
 //--------------------------------------------------------------------
 //	Original defines
@@ -51,6 +52,7 @@ namespace Xamarin.Auth
 	public abstract partial class Authenticator
 #endif
 	{
+        private const string TAG = "XamarinAuth.Authenticator";
 		/// <summary>
 		/// Gets or sets the title of any UI elements that need to be presented for this authenticator.
 		/// </summary>
@@ -188,6 +190,8 @@ namespace Xamarin.Auth
 		/// </param>
 		public void OnSucceeded (string username, IDictionary<string, string> accountProperties)
 		{
+            Log.Info(TAG, $"OnSucceeded() -> User= {username}");
+
 			OnSucceeded (new Account (username, accountProperties));
 		}
 

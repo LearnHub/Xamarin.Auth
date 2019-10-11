@@ -21,6 +21,7 @@ using Android.Webkit;
 using Android.OS;
 using System.Threading.Tasks;
 using Xamarin.Utilities.Android;
+using Android.Util;
 
 namespace Xamarin.Auth
 {
@@ -35,6 +36,7 @@ namespace Xamarin.Auth
 	public class WebAuthenticatorActivity : global::Android.Accounts.AccountAuthenticatorActivity
 #endif
 	{
+        private const string TAG = "XamarinAuth.WebAuthenticatorActivity";
 		WebView webView;
 
 		internal class State : Java.Lang.Object
@@ -198,13 +200,22 @@ namespace Xamarin.Auth
 				this.activity = activity;
 			}
 
-			public override bool ShouldOverrideUrlLoading (WebView view, string url)
-			{
-				return false;
-			}
+			public override bool ShouldOverrideUrlLoading(WebView view, IWebResourceRequest request) {
+                var url = request.Url.ToString();
+                Log.Info(TAG, $"ShouldOverrideUrlLoading(wv,req) -> Req_URL= {url}");
+                bool rv = false;
+
+                if (activity.state.Authenticator is WebRedirectAuthenticator) {
+                    var wra = activity.state.Authenticator as WebRedirectAuthenticator;
+                    rv = wra.UrlMatchesRedirect(new System.Uri(request.Url.ToString()));
+                }
+
+                return rv;
+            }
 
 			public override void OnPageStarted (WebView view, string url, global::Android.Graphics.Bitmap favicon)
 			{
+                Log.Info(TAG, $"OnPageStarted() -> URI= {url}");
 				var uri = new Uri (url);
 				activity.state.Authenticator.OnPageLoading (uri);
 				activity.BeginProgress (uri.Authority);
@@ -212,6 +223,7 @@ namespace Xamarin.Auth
 
 			public override void OnPageFinished (WebView view, string url)
 			{
+                Log.Info(TAG, $"OnPageFinished() -> URI= {url}");
 				var uri = new Uri (url);
 				activity.state.Authenticator.OnPageLoaded (uri);
 				activity.EndProgress ();

@@ -13,6 +13,7 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
+using Android.Util;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -30,6 +31,8 @@ namespace Xamarin.Auth
 	public class WebRedirectAuthenticator : WebAuthenticator
 #endif
 	{
+        private const string TAG = "XamarinAuth.WebRedirectAuthenticator";
+
 		Uri initialUrl;
 		Uri redirectUrl;
 
@@ -72,6 +75,8 @@ namespace Xamarin.Auth
 		/// </param>
 		public override void OnPageLoaded (Uri url)
 		{
+            //Log.Info(TAG, $"OnPageLoaded() -> URI= {url.OriginalString}");
+
 			var query = WebEx.FormDecode (url.Query);
 			var fragment = WebEx.FormDecode (url.Fragment);
 
@@ -86,6 +91,8 @@ namespace Xamarin.Auth
 		/// </param>
 		public override void OnPageLoading (Uri url)
 		{
+            //Log.Info(TAG, $"OnPageLoading() -> URI= {url.OriginalString}");
+
 			var query = WebEx.FormDecode (url.Query);
 			var fragment = WebEx.FormDecode (url.Fragment);
 
@@ -113,6 +120,8 @@ namespace Xamarin.Auth
 		/// </remarks>
 		protected virtual void OnPageEncountered (Uri url, IDictionary<string, string> query, IDictionary<string, string> fragment)
 		{
+            //Log.Info(TAG, $"OnPageEncountered() -> URI= {url.OriginalString}");
+
 			var all = new Dictionary<string, string> (query);
 			foreach (var kv in fragment)
 				all [kv.Key] = kv.Value;
@@ -137,7 +146,7 @@ namespace Xamarin.Auth
 			}
 		}
 
-		private bool UrlMatchesRedirect (Uri url)
+		public bool UrlMatchesRedirect (Uri url)
 		{
 			return url.Host == redirectUrl.Host && url.LocalPath == redirectUrl.LocalPath;
 		}
@@ -156,6 +165,7 @@ namespace Xamarin.Auth
 		/// </param>
 		protected virtual void OnRedirectPageLoaded (Uri url, IDictionary<string, string> query, IDictionary<string, string> fragment)
 		{
+            Log.Info(TAG, $"OnRedirectPageLoaded() -> URI= {url.OriginalString}");
 			OnSucceeded ("", fragment);
 		}
 	}
